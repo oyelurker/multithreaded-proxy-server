@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Designed to Scale | How a Request Travels</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-page: #f6f3eb;
+      --bg-card: #fffefb;
+      --border-dark: #1e1b18;
+      --border-muted: #e4decf;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: #1c1917;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle authentic isometric dot grid canvas */
+    .bg-iso-canvas {
+      background-color: #f7f4ed;
+      background-image:
+        radial-gradient(#d6cfbe 1.2px, transparent 1.2px),
+        radial-gradient(#ded8cb 1.2px, #f7f4ed 1.2px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+
+    /* Retro Neobrutalist UI Styles */
+    .retro-border {
+      border: 1.5px solid var(--border-dark);
+      border-radius: 10px;
+    }
+
+    .retro-pill {
+      border: 1.5px solid var(--border-dark);
+      border-radius: 9999px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .retro-btn {
+      background: #ffffff;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.1s ease;
+    }
+
+    .retro-btn:hover {
+      background: #f5f2e9;
+      transform: translateY(-1px);
+    }
+
+    .retro-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Step Timeline Node */
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+    }
+
+    .step-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 9999px;
+      border: 1.5px solid var(--border-dark);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      transition: all 0.15s ease;
+    }
+
+    .step-item.active .step-circle {
+      background: #1e1b18;
+      color: #ffffff;
+      box-shadow: 0 0 0 3px #bae6fd;
+    }
+
+    .step-item.completed .step-circle {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: #15803d;
+    }
+
+    .step-name {
+      font-size: 9px;
+      font-weight: 700;
+      color: #78716c;
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
+    .step-item.active .step-name {
+      color: #1c1917;
+      font-weight: 900;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1ecdf;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c5bda9;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col overflow-hidden text-xs">
+
+  <!-- ============================================== -->
+  <!-- 1. TOP GLOBAL NAVIGATION HEADER                -->
+  <!-- ============================================== -->
+  <header class="h-12 border-b border-[#ded5c2] bg-[#fbf9f4] flex items-center justify-between px-4 shrink-0 z-30">
+    <!-- Left Logo -->
+    <div class="flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded bg-[#fee2e2] border border-[#ef4444] flex items-center justify-center">
+        <!-- Tree Logo Icon -->
+        <svg class="w-4 h-4 text-[#dc2626]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3v6m0 0l-4 4m4-4l4 4M8 17v4m8-4v4M4 17h16" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <span class="font-extrabold text-sm tracking-tight text-[#1e1b18]">Designed to Scale</span>
+    </div>
+
+    <!-- Center Search Bar (with Ctrl K) -->
+    <div
+      class="hidden md:flex items-center gap-2 bg-[#f4efe3] px-3 py-1 rounded-full border border-[#ded5c2] text-xs text-stone-500 w-80">
+      <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <span class="flex-1 text-[11px]">Search lessons & concepts...</span>
+      <kbd
+        class="font-mono text-[9px] bg-white px-1.5 py-0.5 rounded border border-stone-300 font-bold text-stone-600">Ctrl
+        K</kbd>
+    </div>
+
+    <!-- Right Header Actions (Language, Theme, Sign in, Mode Switcher) -->
+    <div class="flex items-center gap-2">
+      <!-- Mode Switcher: Original vs OS Multithreaded Proxy -->
+      <div class="flex items-center bg-[#f0ebd9] p-0.5 rounded-lg border border-[#ded5c2]">
+        <button id="modeOriginalBtn" onclick="setAppMode('original')"
+          class="px-2 py-0.5 rounded font-bold text-[10px] bg-white text-stone-900 shadow-sm border border-stone-300">
+          Original Lesson
+        </button>
+        <button id="modeProxyBtn" onclick="setAppMode('proxy')"
+          class="px-2 py-0.5 rounded font-bold text-[10px] text-stone-600 hover:text-stone-900">
+          OS Proxy (My C Code)
+        </button>
+      </div>
+
+      <!-- Split view icon -->
+      <button class="retro-btn p-1 text-stone-600 w-7 h-7 flex items-center justify-center" title="Split view">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="12" y1="3" x2="12" y2="21" />
+        </svg>
+      </button>
+
+      <!-- Language selector -->
+      <button class="retro-btn px-2 py-1 flex items-center gap-1 text-[11px] font-mono text-stone-700">
+        <span>🌐</span> EN ▾
+      </button>
+
+      <!-- Audio Toggle -->
+      <button id="audioToggleBtn" onclick="toggleAudio()"
+        class="retro-btn p-1 text-stone-600 w-7 h-7 flex items-center justify-center" title="Sound Effects Toggle">
+        <span id="audioIcon">🔊</span>
+      </button>
+
+      <!-- Google Sign In -->
+      <button class="retro-btn px-2.5 py-1 flex items-center gap-1.5 text-[11px] font-bold text-stone-800">
+        <svg class="w-3 h-3" viewBox="0 0 24 24">
+          <path fill="#4285F4"
+            d="M23.7 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.6c-.3 1.5-1.1 2.8-2.4 3.7v3h3.9c2.3-2.1 3.6-5.2 3.6-8.9z" />
+          <path fill="#34A853"
+            d="M12 24c3.2 0 6-1.1 8-3l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.2v3.1C3.3 21.4 7.4 24 12 24z" />
+          <path fill="#FBBC05"
+            d="M5.3 14.2c-.2-.7-.4-1.5-.4-2.2s.2-1.5.4-2.2V6.7H1.2C.4 8.3 0 10.1 0 12s.4 3.7 1.2 5.3l4.1-3.1z" />
+          <path fill="#EA4335"
+            d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.4 0 3.3 2.6 1.2 6.7l4.1 3.1c.9-2.9 3.6-5 6.7-5z" />
+        </svg>
+        <span>Sign in</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================== -->
+  <!-- 2. THREE-COLUMN APPLICATION WORKSPACE          -->
+  <!-- ============================================== -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- -------------------------------------------- -->
+    <!-- LEFT SIDEBAR: COURSE TREE & LESSON LIST      -->
+    <!-- -------------------------------------------- -->
+    <aside class="w-56 border-r border-[#ded5c2] bg-[#fbf9f4] flex flex-col shrink-0 overflow-y-auto">
+      <div class="p-3 border-b border-[#e5dfd2] flex items-center justify-between">
+        <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-stone-700">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+          </svg>
+          <span>Course</span>
+        </div>
+        <span class="text-[10px] font-mono text-stone-400">40 lessons</span>
+      </div>
+
+      <div class="p-2 space-y-1 text-xs">
+        <!-- 01. Foundations (Active) -->
+        <div class="space-y-0.5">
+          <div class="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-stone-800">
+            <span class="flex items-center gap-1.5">📁 01. Foundations</span>
+            <span class="font-mono text-[9px] text-stone-400">1/3</span>
+          </div>
+          <div class="pl-3 space-y-1 text-[11px]">
+            <div
+              class="px-2 py-1 rounded-full bg-[#dcfce7] border border-emerald-400 text-[#15803d] font-bold flex items-center gap-1.5 cursor-pointer">
+              <span>✓</span> <span>How a Request Travels</span>
+            </div>
+            <div class="px-2 py-1 text-stone-500 hover:text-stone-800 cursor-pointer">
+              Latency & Throughput
+            </div>
+            <div class="px-2 py-1 text-stone-500 hover:text-stone-800 cursor-pointer">
+              Napkin Math
+            </div>
+          </div>
+        </div>
+
+        <!-- Unlock Full Course Card -->
+        <div
+          class="p-2 rounded-lg bg-[#fef3c7] border border-amber-300 flex items-center justify-between text-[11px] font-bold text-amber-900 my-2 shadow-sm cursor-pointer hover:bg-amber-100">
+          <div class="flex items-center gap-1">
+            <span>🔓</span> <span>Unlock Full Course</span>
+          </div>
+          <span
+            class="font-mono text-[10px] bg-amber-200/80 px-1.5 py-0.5 rounded border border-amber-400">US$4.99</span>
+        </div>
+
+        <!-- Remaining 8 Folders with colored folder icons -->
+        <div class="space-y-1 text-stone-600 text-[11px] pt-1">
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-stone-500">📁</span> 02. Scaling</span>
+            <span class="font-mono text-[9px] text-stone-400">0/5</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-purple-500">📁</span> 03. Data & Storage</span>
+            <span class="font-mono text-[9px] text-stone-400">0/11</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-amber-500">📁</span> 04. Communication</span>
+            <span class="font-mono text-[9px] text-stone-400">0/4</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-sky-500">📁</span> 05. Reliability</span>
+            <span class="font-mono text-[9px] text-stone-400">0/4</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-teal-500">📁</span> 06. Architecture</span>
+            <span class="font-mono text-[9px] text-stone-400">0/4</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-pink-500">📁</span> 07. Security</span>
+            <span class="font-mono text-[9px] text-stone-400">0/3</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-lime-600">📁</span> 08. Shipping</span>
+            <span class="font-mono text-[9px] text-stone-400">0/2</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded hover:bg-[#efe9d8] cursor-pointer">
+            <span class="flex items-center gap-1.5"><span class="text-stone-400 font-mono">&gt;</span> <span
+                class="text-indigo-500">📁</span> 09. Whole Systems</span>
+            <span class="font-mono text-[9px] text-stone-400">0/4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Progress Indicator -->
+      <div
+        class="mt-auto p-3 border-t border-[#ded5c2] flex items-center justify-between text-[11px] font-bold text-stone-700">
+        <span class="tracking-wider">PROGRESS</span>
+        <span class="font-mono text-stone-500">1 / 40 &gt;</span>
+      </div>
+    </aside>
+
+    <!-- -------------------------------------------- -->
+    <!-- CENTER MAIN STAGE: ISOMETRIC LESSON CANVAS   -->
+    <!-- -------------------------------------------- -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-iso-canvas relative p-3">
+
+      <!-- Inner Retro Rounded Box Container -->
+      <div class="flex-1 flex flex-col retro-border bg-[#faf7f0] overflow-hidden shadow-sm">
+
+        <!-- Top Stage Banner: Title & 5 Metric Monitors -->
+        <div class="p-3.5 pb-2 border-b border-[#ded5c2] bg-[#fbf9f4] flex flex-col gap-2 shrink-0">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[10px] font-mono text-stone-500 font-semibold mb-0.5">
+                01. Foundations &nbsp;/&nbsp; Lesson 1 of 3
+              </div>
+              <h1 class="text-xl font-black tracking-tight text-[#1e1b18]" id="stageTitle">How a Request Travels</h1>
+              <p class="text-[11px] text-stone-600" id="stageSubtitle">
+                Follow one page load hop by hop — and find out where the time really goes.
+              </p>
+            </div>
+
+            <!-- Right Badges & Playback Buttons -->
+            <div class="flex items-center gap-2">
+              <div class="retro-pill px-2 py-0.5 bg-white text-[10px] font-mono">
+                <span>⏱</span> 10 min
+              </div>
+              <div class="retro-pill px-2 py-0.5 bg-[#dcfce7] text-[#15803d] border-emerald-500 text-[10px]">
+                <span>📶</span> Beginner
+              </div>
+              <div class="retro-pill px-2 py-0.5 bg-[#f3e8ff] text-[#7e22ce] border-purple-400 text-[10px]">
+                <span>📑</span> 10 steps
+              </div>
+              <button onclick="replayTimeline()" class="retro-btn px-2.5 py-1 text-[11px] flex items-center gap-1 ml-1">
+                <span>↺</span> <span>Replay</span>
+              </button>
+              <button onclick="togglePlayPause()" id="playBtn"
+                class="retro-btn px-2.5 py-1 text-[11px] flex items-center gap-1">
+                <span id="playIcon">⏸</span> <span id="playLabel">Pause</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 5 Metric Boxes in a Row -->
+          <div class="grid grid-cols-5 gap-2 mt-0.5">
+            <div id="metricBoxDns" class="retro-border p-1.5 px-2 bg-white">
+              <div class="text-[9px] font-mono font-bold uppercase text-stone-500 flex items-center gap-1">
+                <span>🌐</span> <span id="metricLabel1">DNS LOOKUP</span>
+              </div>
+              <div class="text-sm font-black text-stone-900 font-mono" id="valDns">20 ms</div>
+            </div>
+
+            <div id="metricBoxConnect" class="retro-border p-1.5 px-2 bg-white">
+              <div class="text-[9px] font-mono font-bold uppercase text-stone-500 flex items-center gap-1">
+                <span>⚡</span> <span>CONNECT</span>
+              </div>
+              <div class="text-sm font-black text-stone-900 font-mono" id="valConnect">60 ms</div>
+            </div>
+
+            <div id="metricBoxReq" class="retro-border p-1.5 px-2 bg-white">
+              <div class="text-[9px] font-mono font-bold uppercase text-stone-500 flex items-center gap-1">
+                <span>🗄</span> <span>REQUEST + SERVER</span>
+              </div>
+              <div class="text-sm font-black text-stone-900 font-mono" id="valReq">55 ms</div>
+            </div>
+
+            <div id="metricBoxDownload" class="retro-border p-1.5 px-2 bg-white">
+              <div class="text-[9px] font-mono font-bold uppercase text-stone-500 flex items-center gap-1">
+                <span>📉</span> <span>DOWNLOAD</span>
+              </div>
+              <div class="text-sm font-black text-stone-900 font-mono" id="valDownload">20 ms</div>
+            </div>
+
+            <div id="metricBoxTotal" class="retro-border p-1.5 px-2 bg-[#dcfce7] border-[#10b981]">
+              <div class="text-[9px] font-mono font-bold uppercase text-emerald-800 flex items-center gap-1">
+                <span>⏱</span> <span>TOTAL</span>
+              </div>
+              <div class="text-sm font-black text-emerald-800 font-mono" id="valTotal">155 ms</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Isometric Canvas Area -->
+        <div class="flex-1 relative overflow-hidden flex items-center justify-center">
+
+                    <svg id="svgStage" viewBox="-300 -125 760 300" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              
+    
+      <linearGradient id="g-orange-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#fee6cc"/><stop offset="1" stop-color="#fcd4ad"/>
+      </linearGradient>
+      <linearGradient id="g-orange-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f9c697"/><stop offset="1" stop-color="#f3b47f"/>
+      </linearGradient>
+      <linearGradient id="g-green-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#e2f2d7"/><stop offset="1" stop-color="#d1e9c2"/>
+      </linearGradient>
+      <linearGradient id="g-green-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c3e1b2"/><stop offset="1" stop-color="#b3d79f"/>
+      </linearGradient>
+      <linearGradient id="g-blue-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#dfebf9"/><stop offset="1" stop-color="#cde0f5"/>
+      </linearGradient>
+      <linearGradient id="g-blue-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#bcd3ef"/><stop offset="1" stop-color="#a9c5e8"/>
+      </linearGradient>
+      <linearGradient id="g-yellow-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#fff3d6"/><stop offset="1" stop-color="#fee7b8"/>
+      </linearGradient>
+      <linearGradient id="g-yellow-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fcdb9c"/><stop offset="1" stop-color="#f6cd82"/>
+      </linearGradient>
+      <linearGradient id="g-purple-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#f2eaf9"/><stop offset="1" stop-color="#e6dbf4"/>
+      </linearGradient>
+      <linearGradient id="g-purple-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#d9cbef"/><stop offset="1" stop-color="#cbbae6"/>
+      </linearGradient>
+      <linearGradient id="g-slab-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#f7f0e7"/><stop offset="1" stop-color="#f0e7dc"/>
+      </linearGradient>
+      <linearGradient id="g-slab-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ece2d5"/><stop offset="1" stop-color="#e3d7c8"/>
+      </linearGradient>
+      <linearGradient id="g-store-top" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#f6f1fa"/><stop offset="1" stop-color="#ece4f4"/>
+      </linearGradient>
+      <linearGradient id="g-store-side" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e2d8ee"/><stop offset="1" stop-color="#d6c9e6"/>
+      </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E3D6F3"/><stop offset="1" stop-color="#C9B5E6"/>
+    </linearGradient>
+    <linearGradient id="screen-glare" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cyl-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".3" stop-color="#fff" stop-opacity=".35"/>
+      <stop offset=".55" stop-color="#fff" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#4b2f6b" stop-opacity=".08"/>
+    </linearGradient>
+    <filter id="blur-sm" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <filter id="blur-md" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="blur-lg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6.5"/></filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M1,1.2 L9,5 L1,8.8 Z" fill="#211e1b" stroke="#211e1b" stroke-width="1" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M1,1.2 L9,5 L1,8.8 Z" fill="#a59c90" stroke="#a59c90" stroke-width="1" stroke-linejoin="round"/>
+    </marker>
+    <pattern id="iso-grid" patternUnits="userSpaceOnUse" x="0" y="-7" width="28" height="14">
+      <path d="M0 7 L14 0 L28 7 L14 14 Z" fill="none" stroke="#a8916f" stroke-opacity=".3" stroke-width=".8"/>
+    </pattern>
+            </defs>
+
+            <!-- Authentic Isometric Dot Grid Background -->
+            <rect x="-400" y="-200" width="1000" height="500" fill="url(#iso-grid)" />
+
+            <!-- Floor Rings (Active Node Halos) -->
+            <g id="floorRings">
+              <ellipse id="ringLaptop" cx="-168" cy="84" rx="78" ry="39" fill="none" stroke="#4ade80" stroke-width="2.5" opacity="0" />
+              <ellipse id="ringDns" cx="14" cy="-7" rx="55" ry="28" fill="none" stroke="#4ade80" stroke-width="2.5" opacity="0" />
+              <ellipse id="ringServer" cx="126" cy="77" rx="55" ry="28" fill="none" stroke="#4ade80" stroke-width="2.5" opacity="0" />
+              <ellipse id="ringDb" cx="308" cy="-14" rx="50" ry="25" fill="none" stroke="#4ade80" stroke-width="2.5" opacity="0" />
+            </g>
+
+            <!-- Connecting Wires / Links -->
+            <g id="connectionPaths">
+              <!-- Wire A: Laptop to DNS Resolver -->
+              <path id="pathLaptopToDns" d="M -126 50 L 0 6" fill="none" stroke="#211e1b" stroke-width="2" marker-end="url(#arrow)" opacity="1" />
+
+              <!-- Wire B: Laptop to Web Server (V-shaped isometric wire) -->
+              <path id="pathLaptopToServer" d="M -126 105 L -28 154 L 105 87" fill="none" stroke="#211e1b" stroke-width="2.5" opacity="1" />
+
+              <!-- Wire C: Web Server to Database -->
+              <path id="pathServerToDb" d="M 154 45 L 280 -22" fill="none" stroke="#211e1b" stroke-width="2" opacity="1" />
+            </g>
+
+            <!-- Continuous Moving Dots (animateMotion) -->
+            <circle id="dotReq1" r="4.5" fill="#f59e0b" stroke="#211e1b" stroke-width="1.5" opacity="1">
+              <animateMotion dur="1.8s" repeatCount="indefinite" path="M -126 105 L -28 154 L 105 87" />
+            </circle>
+
+            <circle id="dotResp1" r="4.5" fill="#10b981" stroke="#211e1b" stroke-width="1.5" opacity="1">
+              <animateMotion dur="1.8s" repeatCount="indefinite" path="M 105 87 L -28 154 L -126 105" />
+            </circle>
+
+            <circle id="dotHandshake" r="5" fill="#ffffff" stroke="#10b981" stroke-width="2" opacity="1">
+              <animateMotion dur="1.4s" repeatCount="indefinite" path="M -126 105 L -28 154 L 105 87" />
+            </circle>
+
+            <circle id="dotDbReq" r="4.5" fill="#10b981" stroke="#211e1b" stroke-width="1.5" opacity="1">
+              <animateMotion dur="1.2s" repeatCount="indefinite" path="M 154 45 L 280 -22" />
+            </circle>
+
+            <circle id="dotDnsReq" r="4.5" fill="#f59e0b" stroke="#211e1b" stroke-width="1.5" opacity="0">
+              <animateMotion dur="1.2s" repeatCount="indefinite" path="M -126 50 L 0 6" />
+            </circle>
+
+            <g id="multiDotTrain" opacity="0">
+              <circle r="4" fill="#f59e0b" stroke="#211e1b" stroke-width="1.2">
+                <animateMotion dur="1.6s" begin="0s" repeatCount="indefinite" path="M -126 105 L -28 154 L 105 87" />
+              </circle>
+              <circle r="4" fill="#f59e0b" stroke="#211e1b" stroke-width="1.2">
+                <animateMotion dur="1.6s" begin="0.3s" repeatCount="indefinite" path="M -126 105 L -28 154 L 105 87" />
+              </circle>
+              <circle r="4" fill="#f59e0b" stroke="#211e1b" stroke-width="1.2">
+                <animateMotion dur="1.6s" begin="0.6s" repeatCount="indefinite" path="M -126 105 L -28 154 L 105 87" />
+              </circle>
+            </g>
+
+            <!-- Hop Labels on Links (Step 10) -->
+            <g id="recapHopLabels" opacity="1">
+              <g class="pill" transform="translate(-45 22)">
+                <rect x="-22" y="-9" width="44" height="18" rx="9" fill="#211e1b" opacity="0.12" />
+                <rect x="-22" y="-11" width="44" height="18" rx="9" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3" />
+                <text x="0" y="2.5" text-anchor="middle" font-size="10" font-weight="700" fill="#211e1b">20 ms</text>
+              </g>
+
+              <g class="pill" transform="translate(-28 165)">
+                <rect x="-56" y="-10" width="112" height="20" rx="10" fill="#211e1b" opacity="0.12" />
+                <rect x="-56" y="-12" width="112" height="20" rx="10" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3" />
+                <text x="0" y="2.5" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">60 + 55 + 20 ms</text>
+              </g>
+
+              <g class="pill" transform="translate(217 6)">
+                <rect x="-22" y="-9" width="44" height="18" rx="9" fill="#211e1b" opacity="0.12" />
+                <rect x="-22" y="-11" width="44" height="18" rx="9" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3" />
+                <text x="0" y="2.5" text-anchor="middle" font-size="10" font-weight="700" fill="#211e1b">15 ms</text>
+              </g>
+            </g>
+
+            <!-- ============================================== -->
+            <!-- 3D ISOMETRIC NODES (EXACT SVGS FROM SITE)      -->
+            <!-- ============================================== -->
+
+            <!-- NODE 1: LAPTOP ("YOU") -->
+            <g id="nodeLaptop">
+              
+    <g opacity="1">
+      <path d="M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z" transform="translate(0 5.4)" fill="#6b5236" opacity="0.2" filter="url(#blur-lg)"/>
+      <g transform="translate(0 0)">
+        
+    <path d="M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z" fill="url(#g-slab-side)"/>
+    <path d="M-168,116 Q-168,110 -162.63,107.32 L-90.71,71.35 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -168,118 Z" fill="#3a2a14" opacity=".05"/>
+    <path d="M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -90.71,71.35 L-162.63,107.32 Q-168,110 -173.37,107.32 L-245.29,71.35 Q-252,68 -245.29,64.65 Z" fill="url(#g-slab-top)"/>
+    <path d="M-177.36,37.01 Q-168,33.5 -158.64,37.01 L-91.02,62.37 Q-84,65 -91.02,67.63 L-162.38,94.39 Q-168,96.5 -173.62,94.39 L-244.98,67.63 Q-252,65 -244.98,62.37 Z" fill="#fff" opacity=".22" filter="url(#blur-sm)"/>
+    <path d="M-252,68 L-175.16,106.42 Q-168,110 -160.84,106.42 L-84,68" transform="translate(0 1.4)" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M-252,68 L-175.16,106.42 Q-168,110 -160.84,106.42 L-84,68" transform="translate(0 3.4)" fill="none" stroke="#5a4123" stroke-opacity=".07" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z" fill="none" stroke="#3b3631" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M-232.63,69.28 Q-238,66.6 -232.63,63.92 L-176.17,35.68 Q-170.8,33 -165.43,35.68 L-125.07,55.87 Q-119.7,58.55 -125.07,61.23 L-181.53,89.47 Q-186.9,92.15 -192.27,89.47 Z" fill="#6b5236" opacity=".14" filter="url(#blur-sm)"/>
+        
+    <path d="M-224.7,67.55 Q-224.7,66.05 -222.46,67.17 L-189.14,83.83 Q-186.9,84.95 -186.9,86.45 L-186.9,86.45 Q-186.9,87.95 -189.14,86.83 L-222.46,70.17 Q-224.7,69.05 -224.7,67.55 Z" fill="#ddd6ce"/>
+    <path d="M-186.9,86.45 Q-186.9,84.95 -184.66,83.83 L-130.34,56.67 Q-128.1,55.55 -128.1,57.05 L-128.1,57.05 Q-128.1,58.55 -130.34,59.67 L-184.66,86.83 Q-186.9,87.95 -186.9,86.45 Z" fill="#cfc8c0"/>
+    <path d="M-222.46,67.17 Q-224.7,66.05 -222.46,64.93 L-168.14,37.77 Q-165.9,36.65 -163.66,37.77 L-130.34,54.43 Q-128.1,55.55 -130.34,56.67 L-184.66,83.83 Q-186.9,84.95 -189.14,83.83 Z" fill="#efeae4"/>
+    <path d="M-224.7,67.55 Q-224.7,66.05 -222.46,64.93 L-168.14,37.77 Q-165.9,36.65 -163.66,37.77 L-130.34,54.43 Q-128.1,55.55 -128.1,57.05 L-128.1,57.05 Q-128.1,58.55 -130.34,59.67 L-184.66,86.83 Q-186.9,87.95 -189.14,86.83 L-222.46,70.17 Q-224.7,69.05 -224.7,67.55 Z" fill="none" stroke="#211e1b" stroke-width="1.4" stroke-linejoin="round"/>
+        <g transform="matrix(1 -0.5 1 0.5 -222.6 67.1)" fill="#fbf8f4" stroke="#b9b1a7" stroke-width=".55">
+          <rect x="3" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="7.7" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="12.4" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="17.1" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="21.8" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="26.5" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="31.2" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="35.9" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="40.6" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="45.3" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="50" y="2.5" width="3.8" height="3.3" rx=".7"/><rect x="3" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="7.7" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="12.4" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="17.1" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="21.8" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="26.5" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="31.2" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="35.9" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="40.6" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="45.3" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="50" y="6.8" width="3.8" height="3.3" rx=".7"/><rect x="3" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="7.7" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="12.4" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="17.1" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="21.8" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="26.5" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="31.2" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="35.9" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="40.6" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="45.3" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="50" y="11.1" width="3.8" height="3.3" rx=".7"/><rect x="3" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="7.7" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="12.4" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="17.1" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="21.8" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="26.5" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="31.2" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="35.9" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="40.6" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="45.3" y="15.4" width="3.8" height="3.3" rx=".7"/><rect x="50" y="15.4" width="3.8" height="3.3" rx=".7"/>
+          <rect x="19.4" y="21.5" width="20" height="9" rx="1.6"/>
+        </g>
+        
+    <path d="M-229.6,19.6 Q-229.6,16.6 -227.15,17.83 L-227.15,17.83 Q-224.7,19.05 -224.7,22.05 L-224.7,63.05 Q-224.7,66.05 -227.15,64.83 L-227.15,64.83 Q-229.6,63.6 -229.6,60.6 Z" fill="#6E6862"/>
+    <path d="M-224.7,22.05 Q-224.7,19.05 -222.02,17.71 L-168.58,-9.01 Q-165.9,-10.35 -165.9,-7.35 L-165.9,33.65 Q-165.9,36.65 -168.58,37.99 L-222.02,64.71 Q-224.7,66.05 -224.7,63.05 Z" fill="#3D3935"/>
+    <path d="M-227.15,17.83 Q-229.6,16.6 -226.92,15.26 L-173.48,-11.46 Q-170.8,-12.8 -168.35,-11.57 L-168.35,-11.57 Q-165.9,-10.35 -168.58,-9.01 L-222.02,17.71 Q-224.7,19.05 -227.15,17.83 Z" fill="#8B8580"/>
+    <path d="M-229.6,19.6 Q-229.6,16.6 -226.92,15.26 L-173.48,-11.46 Q-170.8,-12.8 -168.35,-11.57 L-168.35,-11.57 Q-165.9,-10.35 -165.9,-7.35 L-165.9,33.65 Q-165.9,36.65 -168.58,37.99 L-222.02,64.71 Q-224.7,66.05 -227.15,64.83 L-227.15,64.83 Q-229.6,63.6 -229.6,60.6 Z" fill="none" stroke="#211e1b" stroke-width="1.5" stroke-linejoin="round"/>
+        <g transform="matrix(1 -0.5 0 1 -224.7 19.05)">
+    <rect x="3.4" y="3.4" width="52" height="39" rx="1.5" fill="#FBF8F4"/>
+    <rect x="3.4" y="3.4" width="52" height="7" rx="1.5" fill="#E4D9CB"/>
+    <circle cx="6.6" cy="6.9" r="1" fill="#E5534B"/><circle cx="9.6" cy="6.9" r="1" fill="#EFB041"/><circle cx="12.6" cy="6.9" r="1" fill="#7FC278"/>
+    <rect x="16" y="5" width="36" height="3.8" rx="1.9" fill="#FBF8F4"/>
+    <rect x="7" y="14.5" width="44.8" height="12" rx="1.5" fill="url(#screen)"/>
+    <rect x="7" y="29.5" width="27.78" height="2.6" rx="1.3" fill="#D6CCBF"/>
+    <rect x="7" y="34" width="35.84" height="2.6" rx="1.3" fill="#D6CCBF"/>
+    <rect x="3.4" y="3.4" width="52" height="39" rx="1.5" fill="url(#screen-glare)"/></g>
+      </g>
+    </g>
+              <!-- "you" badge -->
+              <g id="badgeYou">
+                
+    <g class="pill">
+      <rect x="-193.95" y="101.5" width="51.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-193.95" y="99.5" width="51.9" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(-184.95 104) scale(0.5)" fill="none" stroke="#211e1b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></g>
+      <text x="-160.5" y="113.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">you</text>
+    </g>
+              </g>
+            </g>
+
+            <!-- NODE 2: DNS RESOLVER (YELLOW CUBE) -->
+            <g id="nodeDns" opacity="1">
+              
+    <g opacity="1">
+      <path d="M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z" transform="translate(0 9)" fill="#6b5236" opacity="0.26" filter="url(#blur-lg)"/>
+      <g transform="translate(0 0)">
+        
+        
+    <path d="M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z" fill="url(#g-yellow-side)"/>
+    <path d="M14,-19 Q14,-25 19.37,-27.68 L61.95,-48.98 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 14,9 Z" fill="#3a2a14" opacity=".05"/>
+    <path d="M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 61.95,-48.98 L19.37,-27.68 Q14,-25 8.63,-27.68 L-33.95,-48.98 Q-42,-53 -33.95,-57.02 Z" fill="url(#g-yellow-top)"/>
+    <path d="M4.64,-73.49 Q14,-77 23.36,-73.49 L61.57,-59.16 Q70,-56 61.57,-52.84 L19.62,-37.11 Q14,-35 8.38,-37.11 L-33.57,-52.84 Q-42,-56 -33.57,-59.16 Z" fill="#fff" opacity=".22" filter="url(#blur-sm)"/>
+    <path d="M-42,-53 L6.84,-28.58 Q14,-25 21.16,-28.58 L70,-53" transform="translate(0 1.4)" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M-42,-53 L6.84,-28.58 Q14,-25 21.16,-28.58 L70,-53" transform="translate(0 3.4)" fill="none" stroke="#5a4123" stroke-opacity=".07" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z" fill="none" stroke="#211e1b" stroke-width="1.9" stroke-linejoin="round"/>
+        
+        
+        
+        <g opacity="1"><g transform="translate(2 -66) scale(1)" fill="none" stroke="#1d1b19" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></g><g opacity="1"><text id="dnsNodeTitle" x="14" y="-23.4" text-anchor="middle" font-size="13.5" font-weight="800" fill="#211e1b">DNS</text><text id="dnsNodeSub" x="14" y="-9.4" text-anchor="middle" font-size="10" font-weight="600" fill="#211e1b">resolver</text></g></g>
+        
+      </g>
+    </g>
+            </g>
+
+            <!-- NODE 3: WEB SERVER (BLUE CUBE) -->
+            <g id="nodeServer" opacity="1">
+              
+    <g opacity="1">
+      <path d="M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z" transform="translate(0 9)" fill="#6b5236" opacity="0.26" filter="url(#blur-lg)"/>
+      <g transform="translate(0 0)">
+        
+        
+    <path d="M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z" fill="url(#g-blue-side)"/>
+    <path d="M126,65 Q126,59 131.37,56.32 L173.95,35.02 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 126,93 Z" fill="#3a2a14" opacity=".05"/>
+    <path d="M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 173.95,35.02 L131.37,56.32 Q126,59 120.63,56.32 L78.05,35.02 Q70,31 78.05,26.98 Z" fill="url(#g-blue-top)"/>
+    <path d="M116.64,10.51 Q126,7 135.36,10.51 L173.57,24.84 Q182,28 173.57,31.16 L131.62,46.89 Q126,49 120.38,46.89 L78.43,31.16 Q70,28 78.43,24.84 Z" fill="#fff" opacity=".22" filter="url(#blur-sm)"/>
+    <path d="M70,31 L118.84,55.42 Q126,59 133.16,55.42 L182,31" transform="translate(0 1.4)" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M70,31 L118.84,55.42 Q126,59 133.16,55.42 L182,31" transform="translate(0 3.4)" fill="none" stroke="#5a4123" stroke-opacity=".07" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z" fill="none" stroke="#211e1b" stroke-width="1.9" stroke-linejoin="round"/>
+        
+        
+        
+        <g opacity="1">
+    <g transform="translate(126 30) scale(1)" fill="none" stroke="#211e1b" stroke-width="1.9" stroke-linecap="round">
+      <rect x="-11" y="-10" width="22" height="8.5" rx="2.2"/>
+      <rect x="-11" y="1.5" width="22" height="8.5" rx="2.2"/>
+      <path d="M-6.5 -5.75h.01M-6.5 5.75h.01" stroke-width="2.6"/>
+      <path d="M1 -5.75h5.5M1 5.75h5.5"/>
+    </g><g opacity="1"><text id="serverNodeTitle" x="126" y="57.1" text-anchor="middle" font-size="13" font-weight="800" fill="#211e1b">Web</text><text id="serverNodeSub" x="126" y="72.6" text-anchor="middle" font-size="13" font-weight="800" fill="#211e1b">Server</text></g></g>
+        
+      </g>
+    </g>
+            </g>
+
+            <!-- NODE 4: DATABASE (PURPLE CYLINDER) -->
+            <g id="nodeDb" opacity="1">
+              
+    <g opacity="1">
+      <ellipse cx="308" cy="-9" rx="36.66" ry="17.83" fill="#6b5236" opacity="0.22" filter="url(#blur-md)"/>
+      
+      <path d="M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52 Z" fill="url(#g-purple-side)"/>
+      
+      <path d="M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52 Z" fill="url(#cyl-sheen)"/>
+      <ellipse cx="308" cy="-52" rx="33.66" ry="16.83" fill="url(#g-purple-top)"/>
+      <path d="M277.34,-49.5 A30.66,14.83 0 0 0 338.66,-49.5" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.4"/>
+      <path d="M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52" fill="none" stroke="#211e1b" stroke-width="1.9" stroke-linejoin="round"/>
+      <ellipse cx="308" cy="-52" rx="33.66" ry="16.83" fill="none" stroke="#211e1b" stroke-width="1.9"/>
+      <g transform="translate(298.5 -25.670858607760167) scale(0.7916666666666666)" fill="none" stroke="#1d1b19" stroke-width="2.2736842105263158" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></g>
+    </g>
+              <g id="badgeDb">
+                <g opacity="1"><g opacity="1">
+    <g class="pill">
+      <rect x="351.66" y="-35.8" width="83.4" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="351.66" y="-37.8" width="83.4" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(360.65828278447964 -33.3) scale(0.5)" fill="none" stroke="#211e1b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></g>
+      <text id="dbNodeTitle" x="400.86" y="-23.52" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">database</text>
+    </g></g></g>
+              </g>
+            </g>
+
+            <!-- ============================================== -->
+            <!-- FLOATING BADGES (EXACT PILLS FROM SITE)        -->
+            <!-- ============================================== -->
+            <g id="badgeLaptopUrl" opacity="0">
+              
+    <g class="pill">
+      <rect x="-247.5" y="-33.5" width="159" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-247.5" y="-35.5" width="159" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(-238.5 -31) scale(0.5)" fill="none" stroke="#211e1b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></g>
+      <text id="laptopUrlText" x="-160.5" y="-21.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">https://shop.example</text>
+    </g>
+            </g>
+
+            <g id="badgeHtmlReady" opacity="1">
+              
+    <g class="pill">
+      <rect x="-244.35" y="-33.5" width="152.7" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-244.35" y="-35.5" width="152.7" height="21" rx="10.5" fill="#dcefd2" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(-235.35 -31) scale(0.5)" fill="none" stroke="#24521c" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g>
+      <text x="-160.5" y="-21.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#24521c">page ready · 155 ms</text>
+    </g>
+            </g>
+
+            <g id="badgeDnsIp" opacity="0">
+              
+    <g class="pill">
+      <rect x="-35.95" y="-88.5" width="99.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-35.95" y="-90.5" width="99.9" height="21" rx="10.5" fill="#fbe5bd" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="14" y="-76.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6d4a0c">→ 203.0.113.7</text>
+    </g>
+            </g>
+
+            <g id="badgeDnsQuestion" opacity="0">
+              
+    <g class="pill">
+      <rect x="-123.3" y="13.5" width="156.6" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-123.3" y="11.5" width="156.6" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-45" y="25.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">where is shop.example?</text>
+    </g>
+            </g>
+
+            <g id="badgeDnsCached" opacity="0">
+              
+    <g class="pill">
+      <rect x="-98.1" y="13.5" width="106.2" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-98.1" y="11.5" width="106.2" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-45" y="25.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">cached · 5 min</text>
+    </g>
+            </g>
+
+            <g id="badgeTcpHandshake" opacity="0">
+              
+    <g class="pill">
+      <rect x="-96.85" y="156.5" width="137.7" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-96.85" y="154.5" width="137.7" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-28" y="168.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">TCP + TLS handshake</text>
+    </g>
+            </g>
+
+            <g id="badgeServerCpu" opacity="0">
+              
+    <g class="pill">
+      <rect x="83" y="-13.5" width="86" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="83" y="-15.5" width="86" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(90.5 -10.5) scale(0.4583333333333333)" fill="none" stroke="#6f6961" stroke-width="4.800000000000001" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></g>
+      <rect x="106" y="-8.5" width="28" height="7" rx="3.5" fill="#e6ddd0"/>
+      <rect x="106" y="-8.5" width="8.4" height="7" rx="3.5" fill="#7fc278"/>
+      <text x="160" y="-1.4" text-anchor="end" font-size="10.5" font-weight="800" fill="#211e1b">30%</text>
+    </g>
+            </g>
+
+            <g id="badgeGetProducts" opacity="0">
+              
+    <g class="pill">
+      <rect x="-69.95" y="156.5" width="99.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-69.95" y="154.5" width="99.9" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-20" y="168.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">GET /products</text>
+    </g>
+            </g>
+
+            <g id="badgeDbSelect" opacity="0">
+              
+    <g class="pill">
+      <rect x="138.7" y="-2.5" width="156.6" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="138.7" y="-4.5" width="156.6" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text id="dbQueryText" x="217" y="9.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">SELECT … FROM products</text>
+    </g>
+            </g>
+
+            <g id="badgeHtmlSize" opacity="0">
+              
+    <g class="pill">
+      <rect x="-99.95" y="141.5" width="99.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-99.95" y="139.5" width="99.9" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-50" y="153.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">HTML · 120 KB</text>
+    </g>
+            </g>
+
+            <g id="badge40Files" opacity="0">
+              
+    <g class="pill">
+      <rect x="-256.95" y="-33.5" width="177.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-256.95" y="-35.5" width="177.9" height="21" rx="10.5" fill="#e7ddf5" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(-247.95 -31) scale(0.5)" fill="none" stroke="#47306f" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g>
+      <text x="-160.5" y="-21.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#47306f">40 files · 1 connection</text>
+    </g>
+            </g>
+
+            <g id="badgeHttp2" opacity="0">
+              
+    <g class="pill">
+      <rect x="-131.5" y="156.5" width="207" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-131.5" y="154.5" width="207" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-28" y="168.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">HTTP/2 · many requests at once</text>
+    </g>
+            </g>
+
+            <g id="badgeSlowQuery" opacity="0">
+              
+    <g class="pill">
+      <rect x="237.95" y="-88.5" width="140.1" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="237.95" y="-90.5" width="140.1" height="21" rx="10.5" fill="#f8d5cf" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(246.95 -86) scale(0.5)" fill="none" stroke="#8f2a22" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></g>
+      <text x="315.5" y="-76.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#8f2a22">400 ms · scanning</text>
+    </g>
+            </g>
+
+            <g id="badgeOrderBy" opacity="0">
+              
+    <g class="pill">
+      <rect x="135.55" y="-2.5" width="162.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="135.55" y="-4.5" width="162.9" height="21" rx="10.5" fill="#f8d5cf" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="217" y="9.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#8f2a22">ORDER BY score · 400 ms</text>
+    </g>
+            </g>
+
+            <g id="badgeSydney" opacity="0">
+              
+    <g class="pill">
+      <rect x="-222.3" y="101.5" width="108.6" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-222.3" y="99.5" width="108.6" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(-213.3 104) scale(0.5)" fill="none" stroke="#211e1b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></g>
+      <text x="-160.5" y="113.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">you · Sydney</text>
+    </g>
+            </g>
+
+            <g id="badgeVirginia" opacity="0">
+              
+    <g class="pill">
+      <rect x="84.3" y="-38.5" width="83.4" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="84.3" y="-40.5" width="83.4" height="21" rx="10.5" fill="#fbf6ef" stroke="#211e1b" stroke-width="1.3"/>
+      <g transform="translate(93.3 -36) scale(0.5)" fill="none" stroke="#211e1b" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></g>
+      <text x="133.5" y="-26.22" text-anchor="middle" font-size="10.5" font-weight="700" fill="#211e1b">Virginia</text>
+    </g>
+            </g>
+
+            <g id="badge200ms" opacity="0">
+              
+    <g class="pill">
+      <rect x="-109.45" y="156.5" width="162.9" height="21" rx="10.5" fill="#1c1a17"/>
+      <rect x="-109.45" y="154.5" width="162.9" height="21" rx="10.5" fill="#fbe5bd" stroke="#211e1b" stroke-width="1.3"/>
+      
+      <text x="-28" y="168.78" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6d4a0c">≈ 200 ms per round trip</text>
+    </g>
+            </g>
+
+          </svg>
+
+          <!-- Floating Recap Card (Bottom Right of Canvas in Step 10) -->
+          <div id="recapCard"
+            class="absolute bottom-3 right-3 retro-border bg-white p-3 max-w-[245px] text-xs shadow-sm z-20">
+            <div class="text-[9px] font-mono font-bold uppercase text-stone-500 mb-1.5 flex items-center gap-1">
+              <span>⏱</span> WHERE THE TIME WENT
+            </div>
+            <div class="space-y-1 font-mono text-[10.5px] text-stone-700">
+              <div class="flex justify-between">
+                <span id="recapItem1Label">DNS lookup</span>
+                <span class="font-bold text-stone-900" id="recapItem1Val">20 ms</span>
+              </div>
+              <div class="flex justify-between">
+                <span id="recapItem2Label">TCP + TLS handshake</span>
+                <span class="font-bold text-stone-900" id="recapItem2Val">60 ms</span>
+              </div>
+              <div class="flex justify-between">
+                <span id="recapItem3Label">request + server</span>
+                <span class="font-bold text-stone-900" id="recapItem3Val">55 ms</span>
+              </div>
+              <div class="flex justify-between">
+                <span id="recapItem4Label">download</span>
+                <span class="font-bold text-stone-900" id="recapItem4Val">20 ms</span>
+              </div>
+              <div
+                class="border-t border-stone-200 pt-1 flex justify-between font-bold text-emerald-800 bg-[#dcfce7] px-1.5 py-0.5 rounded border border-emerald-300">
+                <span>total</span>
+                <span id="recapTotalVal">155 ms</span>
+              </div>
+            </div>
+            <div class="text-[9.5px] text-stone-500 mt-1.5 leading-tight" id="recapSubtext">
+              130 ms of it is waiting on the network
+            </div>
+          </div>
+
+          <!-- Bottom Left Legend -->
+          <div
+            class="absolute bottom-3 left-4 flex items-center gap-3 text-[10.5px] font-mono text-stone-700 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full border border-stone-300">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b] border border-[#1e1b18] inline-block"></span>
+              <span>request</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] border border-[#1e1b18] inline-block"></span>
+              <span>response</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-white border-2 border-[#10b981] inline-block"></span>
+              <span>handshake</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Timeline Stepper (10 Steps) -->
+        <div class="p-2.5 px-4 bg-[#fbf9f4] border-t border-[#ded5c2] shrink-0">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] font-mono font-bold tracking-wider text-stone-500 uppercase">IN THIS LESSON</span>
+            <span class="text-[10px] font-mono font-bold text-stone-700" id="stepCounterText">Step 10 of 10</span>
+          </div>
+
+          <div class="relative flex items-center justify-between px-4">
+            <div class="absolute left-6 right-6 top-3 h-[2px] bg-[#e0d8c7] z-0"></div>
+            <div id="stepProgressBar" class="absolute left-6 top-3 h-[2px] bg-[#1e1b18] z-0 transition-all duration-300"
+              style="width: 100%;"></div>
+
+            <div onclick="goToStep(1)" class="step-item" id="stepItem1">
+              <div class="step-circle">1</div><span class="step-name">Hit Enter</span>
+            </div>
+            <div onclick="goToStep(2)" class="step-item" id="stepItem2">
+              <div class="step-circle">2</div><span class="step-name">Find address</span>
+            </div>
+            <div onclick="goToStep(3)" class="step-item" id="stepItem3">
+              <div class="step-circle">3</div><span class="step-name">Connect</span>
+            </div>
+            <div onclick="goToStep(4)" class="step-item" id="stepItem4">
+              <div class="step-circle">4</div><span class="step-name">Request</span>
+            </div>
+            <div onclick="goToStep(5)" class="step-item" id="stepItem5">
+              <div class="step-circle">5</div><span class="step-name">Fetch data</span>
+            </div>
+            <div onclick="goToStep(6)" class="step-item" id="stepItem6">
+              <div class="step-circle">6</div><span class="step-name">Response</span>
+            </div>
+            <div onclick="goToStep(7)" class="step-item" id="stepItem7">
+              <div class="step-circle">7</div><span class="step-name">More files</span>
+            </div>
+            <div onclick="goToStep(8)" class="step-item" id="stepItem8">
+              <div class="step-circle">8</div><span class="step-name">Slow query</span>
+            </div>
+            <div onclick="goToStep(9)" class="step-item" id="stepItem9">
+              <div class="step-circle">9</div><span class="step-name">Far away</span>
+            </div>
+            <div onclick="goToStep(10)" class="step-item active" id="stepItem10">
+              <div class="step-circle">10</div><span class="step-name">Recap</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- -------------------------------------------- -->
+    <!-- RIGHT SIDEBAR: STEP SUMMARY & YOU'LL LEARN   -->
+    <!-- -------------------------------------------- -->
+    <aside class="w-80 border-l border-[#ded5c2] bg-[#fbf9f4] flex flex-col shrink-0 overflow-y-auto p-3 gap-3">
+
+      <!-- Top Step Header -->
+      <div class="flex items-center justify-between border-b border-[#ded5c2] pb-2">
+        <span class="font-mono text-[10px] font-bold uppercase text-stone-500" id="rightStepTag">STEP 10 / 10</span>
+        <span class="bg-[#1e1b18] text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded"
+          id="rightStatusTag">RECAP</span>
+      </div>
+
+      <!-- Main Step Explainer Card -->
+      <div class="space-y-2.5">
+        <h2 class="text-base font-black tracking-tight text-stone-900" id="rightHeading">Where the time went</h2>
+        <p class="text-stone-600 text-[11px] leading-relaxed" id="rightDescription">
+          Of 155 ms, only about 25 ms was the server and database actually working. The other ~130 ms was messages
+          crossing the network.
+        </p>
+
+        <!-- Checklist of key observations -->
+        <div class="space-y-2 pt-1" id="rightChecklist">
+          <div class="flex items-start gap-2">
+            <span
+              class="w-4 h-4 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">✓</span>
+            <span class="text-[11px] text-stone-700 leading-snug">DNS turns names into addresses; answers are
+              cached.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-4 h-4 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">✓</span>
+            <span class="text-[11px] text-stone-700 leading-snug">Connections cost <strong>round trips</strong> — reuse
+              them.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-4 h-4 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">✓</span>
+            <span class="text-[11px] text-stone-700 leading-snug">Server code is often the smallest slice of latency —
+              unless a slow query sneaks in.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-4 h-4 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">✓</span>
+            <span class="text-[11px] text-stone-700 leading-snug">Distance multiplies every round trip.</span>
+          </div>
+        </div>
+
+        <!-- Coming Up Card -->
+        <div class="p-2.5 rounded-lg border border-stone-300 bg-white flex items-start gap-2 mt-2">
+          <span class="text-stone-400 font-bold">→</span>
+          <div class="text-[11px]">
+            <div class="text-[9px] font-mono font-bold uppercase text-stone-400">COMING UP</div>
+            <div class="text-stone-700 mt-0.5 leading-snug">
+              Next up: <strong>Latency & Throughput</strong> — what happens to that 155 ms when thousands of users
+              arrive at once.
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="prevStep()"
+            class="retro-btn py-1.5 text-xs text-stone-700 flex items-center justify-center gap-1">
+            <span>←</span> Back
+          </button>
+          <button onclick="nextStep()"
+            class="retro-btn py-1.5 text-xs bg-[#dcfce7] text-[#15803d] border-emerald-500 flex items-center justify-center gap-1">
+            <span>Next</span> <span>→</span>
+          </button>
+        </div>
+
+        <!-- Keyboard Shortcut Hint -->
+        <div class="text-[9px] font-mono text-stone-400 text-center pt-1">
+          <kbd class="bg-white px-1 py-0.5 rounded border border-stone-300 text-stone-600">[ &lt; ]</kbd> <kbd
+            class="bg-white px-1 py-0.5 rounded border border-stone-300 text-stone-600">[ &gt; ]</kbd> step
+          &nbsp;•&nbsp;
+          <kbd class="bg-white px-1 py-0.5 rounded border border-stone-300 text-stone-600">R</kbd> replay &nbsp;•&nbsp;
+          <kbd class="bg-white px-1 py-0.5 rounded border border-stone-300 text-stone-600">Space</kbd> pause
+        </div>
+      </div>
+
+      <!-- Bottom Card: You'll Learn -->
+      <div class="border-t border-[#ded5c2] pt-3 mt-auto space-y-2">
+        <div class="text-[10px] font-mono font-bold uppercase text-stone-700">YOU'LL LEARN</div>
+        <div class="space-y-1.5 text-[11px] text-stone-700">
+          <div class="flex items-start gap-2">
+            <span
+              class="w-3.5 h-3.5 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">✓</span>
+            <span>What DNS does and why it is cached</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-3.5 h-3.5 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">✓</span>
+            <span>Why a connection costs round trips</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-3.5 h-3.5 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">✓</span>
+            <span>The path: browser → server → database → back</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-3.5 h-3.5 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">✓</span>
+            <span>Where page-load time actually goes</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="w-3.5 h-3.5 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[9px] shrink-0 mt-0.5">✓</span>
+            <span>Cases: a slow query and a distant user</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 3. JAVASCRIPT ANIMATION & STEP CONTROLLER      -->
+  <!-- ============================================== -->
+  <script>
+    let currentStep = 10;
+    let isPlaying = false;
+    let playInterval = null;
+    let soundEnabled = true;
+    let currentAppMode = 'original';
+    let audioCtx = null;
+
+    function playTone(freq, type = 'sine', dur = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) { }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('audioIcon').textContent = soundEnabled ? '🔊' : '🔇';
+      if (soundEnabled) playTone(800, 'sine', 0.1);
+    }
+
+    // Step Configuration Data (Exact match for all 10 steps)
+    const stepConfigs = {
+      1: {
+        name: "Hit Enter",
+        dns: "-", connect: "-", req: "-", download: "-", total: "-",
+        activeMetrics: [],
+        showDns: false, showServer: false, showDb: false,
+        pathDns: false, pathServer: false, pathDb: false,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: false,
+        dots: [],
+        badges: ["badgeLaptopUrl"],
+        recap: false,
+        heading: "Hit Enter",
+        desc: "You type an address into the browser and hit enter. The browser needs to find where that website lives before it can do anything.",
+        checklist: [
+          "The browser starts with just a domain name.",
+          "No connections exist yet.",
+          "Operating system network stack initializes the request."
+        ]
+      },
+      2: {
+        name: "Find address",
+        dns: "20 ms", connect: "-", req: "-", download: "-", total: "20 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: false, showDb: false,
+        pathDns: true, pathServer: false, pathDb: false,
+        ringLaptop: false, ringDns: true, ringServer: false, ringDb: false,
+        dots: ["dotDnsReq"],
+        badges: ["badgeLaptopUrl", "badgeDnsIp", "badgeDnsQuestion"],
+        recap: false,
+        heading: "Find the address (DNS)",
+        desc: "The browser asks a DNS resolver: 'Where is shop.example?' The resolver returns the server's IP address: 203.0.113.7.",
+        checklist: [
+          "DNS translates human names into computer IP addresses.",
+          "Takes 20 ms round-trip to resolve.",
+          "Answers will be cached locally to skip this step next time."
+        ]
+      },
+      3: {
+        name: "Connect",
+        dns: "20 ms", connect: "60 ms", req: "-", download: "-", total: "80 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: true, showDb: false,
+        pathDns: true, pathServer: true, pathDb: false,
+        ringLaptop: false, ringDns: false, ringServer: true, ringDb: false,
+        dots: ["dotHandshake"],
+        badges: ["badgeLaptopUrl", "badgeDnsCached", "badgeTcpHandshake"],
+        recap: false,
+        heading: "Open a connection",
+        desc: "Your browser opens a TCP socket and performs the cryptographic TLS handshake to secure the connection.",
+        checklist: [
+          "TCP SYN, SYN-ACK, ACK 3-way handshake.",
+          "TLS negotiation verifies certificates and exchanges encryption keys.",
+          "Takes 60 ms — round-trips add up fast!"
+        ]
+      },
+      4: {
+        name: "Request",
+        dns: "20 ms", connect: "60 ms", req: "40 ms", download: "-", total: "120 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: true, showDb: false,
+        pathDns: true, pathServer: true, pathDb: false,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: false,
+        dots: ["dotReq1", "dotResp1"],
+        badges: ["badgeLaptopUrl", "badgeDnsCached", "badgeGetProducts", "badgeServerCpu"],
+        recap: false,
+        heading: "Send the HTTP request",
+        desc: "The browser sends 'GET /products'. The web server receives the headers and begins processing.",
+        checklist: [
+          "HTTP request travels over the open encrypted TCP connection.",
+          "Web server CPU spins up to parse routing and parameters.",
+          "Server code handles authentication and business logic."
+        ]
+      },
+      5: {
+        name: "Fetch data",
+        dns: "20 ms", connect: "60 ms", req: "55 ms", download: "-", total: "135 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: true,
+        dots: ["dotReq1", "dotDbReq"],
+        badges: ["badgeLaptopUrl", "badgeDnsCached", "badgeGetProducts", "badgeServerCpu", "badgeDbSelect"],
+        recap: false,
+        heading: "Query the database",
+        desc: "The web server needs data to build the page, so it queries the database: 'SELECT ... FROM products'.",
+        checklist: [
+          "Internal query hop adds ~15 ms.",
+          "Database scans indexes and retrieves product rows.",
+          "Server constructs HTML template from returned rows."
+        ]
+      },
+      6: {
+        name: "Response",
+        dns: "20 ms", connect: "60 ms", req: "55 ms", download: "20 ms", total: "155 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: false,
+        dots: ["dotResp1"],
+        badges: ["badgeHtmlReady", "badgeDnsCached", "badgeServerCpu", "badgeDbSelect", "badgeHtmlSize"],
+        recap: false,
+        heading: "Receive the response",
+        desc: "The web server sends back 'HTTP 200 OK' with 120 KB of HTML. The browser finishes downloading and renders the page in 155 ms total!",
+        checklist: [
+          "Response payload streams in chunks.",
+          "Page ready status lights up at 155 ms.",
+          "Browser starts building DOM tree."
+        ]
+      },
+      7: {
+        name: "More files",
+        dns: "20 ms", connect: "60 ms", req: "55 ms", download: "140 ms", total: "275 ms",
+        activeMetrics: ["metricBoxDownload", "metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: true, ringDns: false, ringServer: true, ringDb: false,
+        dots: ["multiDotTrain"],
+        badges: ["badge40Files", "badgeDnsCached", "badgeServerCpu", "badgeDbSelect", "badgeHttp2"],
+        recap: false,
+        heading: "Multiplexing more files",
+        desc: "A modern webpage needs images, styles, and scripts. HTTP/2 multiplexes 40 files over a single TCP connection simultaneously.",
+        checklist: [
+          "No need to reopen 40 separate TCP connections.",
+          "Streams are interleaved concurrently.",
+          "Download time increases to 140 ms."
+        ]
+      },
+      8: {
+        name: "Slow query",
+        dns: "20 ms", connect: "60 ms", req: "440 ms", download: "20 ms", total: "540 ms",
+        activeMetrics: ["metricBoxReq", "metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: false,
+        dots: ["dotReq1"],
+        badges: ["badgeLaptopUrl", "badgeDnsCached", "badgeServerCpu", "badgeGetProducts", "badgeSlowQuery", "badgeOrderBy"],
+        recap: false,
+        heading: "What if the query is slow?",
+        desc: "An unindexed 'ORDER BY score' query forces a full table scan, adding 400 ms! Total latency jumps from 155 ms to 540 ms.",
+        checklist: [
+          "Server is stalled waiting on the database.",
+          "User sees a blank loading spinner.",
+          "Indexes and query optimization are vital."
+        ]
+      },
+      9: {
+        name: "Far away",
+        dns: "20 ms", connect: "400 ms", req: "225 ms", download: "60 ms", total: "705 ms",
+        activeMetrics: ["metricBoxConnect", "metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: true, ringDns: false, ringServer: true, ringDb: false,
+        dots: ["dotReq1"],
+        badges: ["badgeLaptopUrl", "badgeDnsCached", "badgeSydney", "badgeVirginia", "badge200ms", "badgeDbSelect"],
+        recap: false,
+        heading: "What if you are far away?",
+        desc: "A user in Sydney connecting to a server in Virginia incurs 200 ms per round trip! Total time jumps to 705 ms due to the speed of light.",
+        checklist: [
+          "Physics cannot be bypassed: ~200 ms round trip.",
+          "Every handshake and request takes 4x longer.",
+          "Edge proxies and CDNs exist to bring content closer."
+        ]
+      },
+      10: {
+        name: "Recap",
+        dns: "20 ms", connect: "60 ms", req: "55 ms", download: "20 ms", total: "155 ms",
+        activeMetrics: ["metricBoxTotal"],
+        showDns: true, showServer: true, showDb: true,
+        pathDns: true, pathServer: true, pathDb: true,
+        ringLaptop: false, ringDns: false, ringServer: false, ringDb: false,
+        dots: ["dotReq1", "dotResp1", "dotDbReq"],
+        badges: ["badgeHtmlReady"],
+        recap: true,
+        heading: "Where the time went",
+        desc: "Of 155 ms, only about 25 ms was the server and database actually working. The other ~130 ms was messages crossing the network.",
+        checklist: [
+          "DNS turns names into addresses; answers are cached.",
+          "Connections cost round trips — reuse them.",
+          "Server code is often the smallest slice of latency — unless a slow query sneaks in.",
+          "Distance multiplies every round trip."
+        ]
+      }
+    };
+
+    function applyStep(stepNum) {
+      currentStep = stepNum;
+      const cfg = stepConfigs[stepNum];
+
+      // 1. Metric Monitors
+      document.getElementById('valDns').textContent = cfg.dns;
+      document.getElementById('valConnect').textContent = cfg.connect;
+      document.getElementById('valReq').textContent = cfg.req;
+      document.getElementById('valDownload').textContent = cfg.download;
+      document.getElementById('valTotal').textContent = cfg.total;
+
+      ['metricBoxDns', 'metricBoxConnect', 'metricBoxReq', 'metricBoxDownload', 'metricBoxTotal'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'retro-border p-1.5 px-2 bg-white';
+      });
+
+      cfg.activeMetrics.forEach(id => {
+        const el = document.getElementById(id);
+        if (stepNum === 7 || stepNum === 8 || stepNum === 9) {
+          el.className = 'retro-border p-1.5 px-2 bg-[#fef3c7] border-[#f59e0b] text-[#b45309] font-bold';
+        } else {
+          el.className = 'retro-border p-1.5 px-2 bg-[#dcfce7] border-[#10b981] text-[#15803d] font-bold';
+        }
+      });
+
+      // 2. Nodes Visibility
+      document.getElementById('nodeDns').setAttribute('opacity', cfg.showDns ? '1' : '0');
+      document.getElementById('nodeServer').setAttribute('opacity', cfg.showServer ? '1' : '0');
+      document.getElementById('nodeDb').setAttribute('opacity', cfg.showDb ? '1' : '0');
+
+      // 3. Paths
+      const pDns = document.getElementById('pathLaptopToDns');
+      pDns.setAttribute('opacity', cfg.pathDns ? '1' : '0');
+      pDns.setAttribute('stroke-dasharray', stepNum >= 3 ? '4,4' : '0');
+
+      document.getElementById('pathLaptopToServer').setAttribute('opacity', cfg.pathServer ? '1' : '0');
+      document.getElementById('pathServerToDb').setAttribute('opacity', cfg.pathDb ? '1' : '0');
+
+      // 4. Floor Rings
+      document.getElementById('ringLaptop').setAttribute('opacity', cfg.ringLaptop ? '1' : '0');
+      document.getElementById('ringDns').setAttribute('opacity', cfg.ringDns ? '1' : '0');
+      document.getElementById('ringServer').setAttribute('opacity', cfg.ringServer ? '1' : '0');
+      document.getElementById('ringDb').setAttribute('opacity', cfg.ringDb ? '1' : '0');
+
+      // 5. Badges
+      const allBadges = [
+        "badgeLaptopUrl", "badgeDnsIp", "badgeDnsQuestion", "badgeDnsCached",
+        "badgeTcpHandshake", "badgeGetProducts", "badgeServerCpu", "badgeDbSelect",
+        "badgeHtmlReady", "badgeHtmlSize", "badge40Files", "badgeHttp2",
+        "badgeSlowQuery", "badgeOrderBy", "badgeSydney", "badgeVirginia", "badge200ms"
+      ];
+      allBadges.forEach(bId => {
+        const el = document.getElementById(bId);
+        if (el) el.setAttribute('opacity', '0');
+      });
+      cfg.badges.forEach(bId => {
+        const el = document.getElementById(bId);
+        if (el) el.setAttribute('opacity', '1');
+      });
+
+      // 6. Recap Hop Labels & Floating Card
+      document.getElementById('recapHopLabels').setAttribute('opacity', cfg.recap ? '1' : '0');
+      const recapCard = document.getElementById('recapCard');
+      if (cfg.recap) {
+        recapCard.classList.remove('hidden');
+      } else {
+        recapCard.classList.add('hidden');
+      }
+
+      // 7. Continuous Motion Dots
+      const allDots = ["dotReq1", "dotResp1", "dotHandshake", "dotDbReq", "dotDnsReq", "multiDotTrain"];
+      allDots.forEach(dId => {
+        const el = document.getElementById(dId);
+        if (el) el.setAttribute('opacity', '0');
+      });
+      cfg.dots.forEach(dId => {
+        const el = document.getElementById(dId);
+        if (el) el.setAttribute('opacity', '1');
+      });
+
+      // 8. Timeline Stepper
+      document.getElementById('stepCounterText').textContent = `Step ${stepNum} of 10`;
+      const progressPercent = ((stepNum - 1) / 9) * 100;
+      document.getElementById('stepProgressBar').style.width = `${progressPercent}%`;
+
+      for (let i = 1; i <= 10; i++) {
+        const item = document.getElementById(`stepItem${i}`);
+        item.classList.remove('active', 'completed');
+        if (i === stepNum) {
+          item.classList.add('active');
+        } else if (i < stepNum) {
+          item.classList.add('completed');
+        }
+      }
+
+      // 9. Update Right Sidebar Content
+      document.getElementById('rightStepTag').textContent = `STEP ${stepNum} / 10`;
+      document.getElementById('rightStatusTag').textContent = stepNum === 10 ? 'RECAP' : `STEP ${stepNum}`;
+      document.getElementById('rightHeading').textContent = cfg.heading;
+      document.getElementById('rightDescription').textContent = cfg.desc;
+
+      const checklistContainer = document.getElementById('rightChecklist');
+      checklistContainer.innerHTML = '';
+      cfg.checklist.forEach(text => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-2';
+        row.innerHTML = `
+          <span class="w-4 h-4 rounded bg-[#dcfce7] border border-emerald-400 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">✓</span>
+          <span class="text-[11px] text-stone-700 leading-snug">${text}</span>
+        `;
+        checklistContainer.appendChild(row);
+      });
+
+      playTone(380 + (stepNum * 45), 'sine', 0.05);
+    }
+
+    function goToStep(s) {
+      applyStep(s);
+    }
+
+    function nextStep() {
+      if (currentStep < 10) applyStep(currentStep + 1);
+      else applyStep(1);
+    }
+
+    function prevStep() {
+      if (currentStep > 1) applyStep(currentStep - 1);
+    }
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      document.getElementById('playIcon').textContent = isPlaying ? '⏸' : '▶';
+      document.getElementById('playLabel').textContent = isPlaying ? 'Pause' : 'Play';
+      if (isPlaying) {
+        startAutoPlay();
+      } else {
+        clearInterval(playInterval);
+      }
+      playTone(500, 'triangle', 0.08);
+    }
+
+    function replayTimeline() {
+      clearInterval(playInterval);
+      isPlaying = true;
+      document.getElementById('playIcon').textContent = '⏸';
+      document.getElementById('playLabel').textContent = 'Pause';
+      applyStep(1);
+      startAutoPlay();
+    }
+
+    function startAutoPlay() {
+      clearInterval(playInterval);
+      playInterval = setInterval(() => {
+        if (currentStep < 10) {
+          applyStep(currentStep + 1);
+        } else {
+          applyStep(1);
+        }
+      }, 2800);
+    }
+
+    // Toggle between Original Lesson & OS Multithreaded Proxy
+    function setAppMode(mode) {
+      currentAppMode = mode;
+      const origBtn = document.getElementById('modeOriginalBtn');
+      const proxyBtn = document.getElementById('modeProxyBtn');
+
+      if (mode === 'proxy') {
+        origBtn.className = 'px-2 py-0.5 rounded font-bold text-[10px] text-stone-600 hover:text-stone-900';
+        proxyBtn.className = 'px-2 py-0.5 rounded font-bold text-[10px] bg-white text-stone-900 shadow-sm border border-stone-300';
+
+        document.getElementById('stageTitle').textContent = "How a Request Travels through a Multithreaded Proxy";
+        document.getElementById('stageSubtitle').textContent = "Follow one request through POSIX semaphores, detached pthreads, and LRU cache mutexes.";
+        document.getElementById('laptopUrlText').textContent = "http://example.com (fd = 5)";
+        document.getElementById('metricLabel1').textContent = "SEMAPHORE (32)";
+        document.getElementById('dnsNodeTitle').textContent = "sem_t";
+        document.getElementById('dnsNodeSub').textContent = "slots (32)";
+        document.getElementById('serverNodeTitle').textContent = "Proxy";
+        document.getElementById('serverNodeSub').textContent = "Server (C)";
+        document.getElementById('dbNodeTitle').textContent = "LRU Cache";
+        document.getElementById('dbQueryText').textContent = "find(url) with mutex lock";
+
+        document.getElementById('recapItem1Label').textContent = "sem_trywait (slots)";
+        document.getElementById('recapItem2Label').textContent = "pthread_create spawn";
+        document.getElementById('recapItem3Label').textContent = "LRU cache + libcurl fetch";
+        document.getElementById('recapItem4Label').textContent = "stream to client (send_all)";
+        document.getElementById('recapSubtext').textContent = "Only ~4ms was proxy OS overhead. 130ms was origin network transit.";
+      } else {
+        origBtn.className = 'px-2 py-0.5 rounded font-bold text-[10px] bg-white text-stone-900 shadow-sm border border-stone-300';
+        proxyBtn.className = 'px-2 py-0.5 rounded font-bold text-[10px] text-stone-600 hover:text-stone-900';
+
+        document.getElementById('stageTitle').textContent = "How a Request Travels";
+        document.getElementById('stageSubtitle').textContent = "Follow one page load hop by hop — and find out where the time really goes.";
+        document.getElementById('laptopUrlText').textContent = "https://shop.example";
+        document.getElementById('metricLabel1').textContent = "DNS LOOKUP";
+        document.getElementById('dnsNodeTitle').textContent = "DNS";
+        document.getElementById('dnsNodeSub').textContent = "resolver";
+        document.getElementById('serverNodeTitle').textContent = "Web";
+        document.getElementById('serverNodeSub').textContent = "Server";
+        document.getElementById('dbNodeTitle').textContent = "database";
+        document.getElementById('dbQueryText').textContent = "SELECT ... FROM products";
+
+        document.getElementById('recapItem1Label').textContent = "DNS lookup";
+        document.getElementById('recapItem2Label').textContent = "TCP + TLS handshake";
+        document.getElementById('recapItem3Label').textContent = "request + server";
+        document.getElementById('recapItem4Label').textContent = "download";
+        document.getElementById('recapSubtext').textContent = "130 ms of it is waiting on the network";
+      }
+
+      applyStep(currentStep);
+      playTone(600, 'sine', 0.08);
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'ArrowRight') {
+        nextStep();
+      } else if (e.code === 'ArrowLeft') {
+        prevStep();
+      } else if (e.code === 'KeyR') {
+        replayTimeline();
+      }
+    });
+
+    // Start on Step 10 (matching uploaded screenshot)
+    window.addEventListener('DOMContentLoaded', () => {
+      applyStep(10);
+    });
+  </script>
+</body>
+
+</html>

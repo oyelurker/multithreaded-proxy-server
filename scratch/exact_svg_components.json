@@ -1,0 +1,195 @@
+{
+  "defs": "\n    \n      <linearGradient id=\"g-orange-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#fee6cc\"/><stop offset=\"1\" stop-color=\"#fcd4ad\"/>\n      </linearGradient>\n      <linearGradient id=\"g-orange-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#f9c697\"/><stop offset=\"1\" stop-color=\"#f3b47f\"/>\n      </linearGradient>\n      <linearGradient id=\"g-green-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#e2f2d7\"/><stop offset=\"1\" stop-color=\"#d1e9c2\"/>\n      </linearGradient>\n      <linearGradient id=\"g-green-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#c3e1b2\"/><stop offset=\"1\" stop-color=\"#b3d79f\"/>\n      </linearGradient>\n      <linearGradient id=\"g-blue-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#dfebf9\"/><stop offset=\"1\" stop-color=\"#cde0f5\"/>\n      </linearGradient>\n      <linearGradient id=\"g-blue-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#bcd3ef\"/><stop offset=\"1\" stop-color=\"#a9c5e8\"/>\n      </linearGradient>\n      <linearGradient id=\"g-yellow-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#fff3d6\"/><stop offset=\"1\" stop-color=\"#fee7b8\"/>\n      </linearGradient>\n      <linearGradient id=\"g-yellow-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#fcdb9c\"/><stop offset=\"1\" stop-color=\"#f6cd82\"/>\n      </linearGradient>\n      <linearGradient id=\"g-purple-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#f2eaf9\"/><stop offset=\"1\" stop-color=\"#e6dbf4\"/>\n      </linearGradient>\n      <linearGradient id=\"g-purple-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#d9cbef\"/><stop offset=\"1\" stop-color=\"#cbbae6\"/>\n      </linearGradient>\n      <linearGradient id=\"g-slab-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#f7f0e7\"/><stop offset=\"1\" stop-color=\"#f0e7dc\"/>\n      </linearGradient>\n      <linearGradient id=\"g-slab-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#ece2d5\"/><stop offset=\"1\" stop-color=\"#e3d7c8\"/>\n      </linearGradient>\n      <linearGradient id=\"g-store-top\" x1=\"0\" y1=\"0\" x2=\"0.35\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#f6f1fa\"/><stop offset=\"1\" stop-color=\"#ece4f4\"/>\n      </linearGradient>\n      <linearGradient id=\"g-store-side\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n        <stop offset=\"0\" stop-color=\"#e2d8ee\"/><stop offset=\"1\" stop-color=\"#d6c9e6\"/>\n      </linearGradient>\n    <linearGradient id=\"screen\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\">\n      <stop offset=\"0\" stop-color=\"#E3D6F3\"/><stop offset=\"1\" stop-color=\"#C9B5E6\"/>\n    </linearGradient>\n    <linearGradient id=\"screen-glare\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0.6\">\n      <stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".35\"/><stop offset=\".45\" stop-color=\"#fff\" stop-opacity=\"0\"/>\n    </linearGradient>\n    <linearGradient id=\"cyl-sheen\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\">\n      <stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0\"/>\n      <stop offset=\".3\" stop-color=\"#fff\" stop-opacity=\".35\"/>\n      <stop offset=\".55\" stop-color=\"#fff\" stop-opacity=\".05\"/>\n      <stop offset=\"1\" stop-color=\"#4b2f6b\" stop-opacity=\".08\"/>\n    </linearGradient>\n    <filter id=\"blur-sm\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"140%\"><feGaussianBlur stdDeviation=\"2.2\"/></filter>\n    <filter id=\"blur-md\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"4\"/></filter>\n    <filter id=\"blur-lg\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feGaussianBlur stdDeviation=\"6.5\"/></filter>\n    <filter id=\"glow\" x=\"-40%\" y=\"-40%\" width=\"180%\" height=\"180%\"><feGaussianBlur stdDeviation=\"9\"/></filter>\n    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"8.6\" refY=\"5\" markerWidth=\"5.2\" markerHeight=\"5.2\" orient=\"auto-start-reverse\" markerUnits=\"strokeWidth\">\n      <path d=\"M1,1.2 L9,5 L1,8.8 Z\" fill=\"#211e1b\" stroke=\"#211e1b\" stroke-width=\"1\" stroke-linejoin=\"round\"/>\n    </marker>\n    <marker id=\"arrow-muted\" viewBox=\"0 0 10 10\" refX=\"8.6\" refY=\"5\" markerWidth=\"5.2\" markerHeight=\"5.2\" orient=\"auto-start-reverse\" markerUnits=\"strokeWidth\">\n      <path d=\"M1,1.2 L9,5 L1,8.8 Z\" fill=\"#a59c90\" stroke=\"#a59c90\" stroke-width=\"1\" stroke-linejoin=\"round\"/>\n    </marker>\n    <pattern id=\"iso-grid\" patternUnits=\"userSpaceOnUse\" x=\"0\" y=\"-7\" width=\"28\" height=\"14\">\n      <path d=\"M0 7 L14 0 L28 7 L14 14 Z\" fill=\"none\" stroke=\"#a8916f\" stroke-opacity=\".3\" stroke-width=\".8\"/>\n    </pattern>",
+  "dev": {
+    "body": "\n    <g opacity=\"1\">\n      <path d=\"M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z\" transform=\"translate(0 5.4)\" fill=\"#6b5236\" opacity=\"0.2\" filter=\"url(#blur-lg)\"/>\n      <g transform=\"translate(0 0)\">\n        \n    <path d=\"M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z\" fill=\"url(#g-slab-side)\"/>\n    <path d=\"M-168,116 Q-168,110 -162.63,107.32 L-90.71,71.35 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -168,118 Z\" fill=\"#3a2a14\" opacity=\".05\"/>\n    <path d=\"M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -90.71,71.35 L-162.63,107.32 Q-168,110 -173.37,107.32 L-245.29,71.35 Q-252,68 -245.29,64.65 Z\" fill=\"url(#g-slab-top)\"/>\n    <path d=\"M-177.36,37.01 Q-168,33.5 -158.64,37.01 L-91.02,62.37 Q-84,65 -91.02,67.63 L-162.38,94.39 Q-168,96.5 -173.62,94.39 L-244.98,67.63 Q-252,65 -244.98,62.37 Z\" fill=\"#fff\" opacity=\".22\" filter=\"url(#blur-sm)\"/>\n    <path d=\"M-252,68 L-175.16,106.42 Q-168,110 -160.84,106.42 L-84,68\" transform=\"translate(0 1.4)\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".75\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>\n    <path d=\"M-252,68 L-175.16,106.42 Q-168,110 -160.84,106.42 L-84,68\" transform=\"translate(0 3.4)\" fill=\"none\" stroke=\"#5a4123\" stroke-opacity=\".07\" stroke-width=\"2.4\" stroke-linecap=\"round\"/>\n    <path d=\"M-176.94,30.47 Q-168,26 -159.06,30.47 L-90.71,64.65 Q-84,68 -84,75.5 L-84,76.5 Q-84,84 -90.71,87.35 L-157.27,120.63 Q-168,126 -178.73,120.63 L-245.29,87.35 Q-252,84 -252,76.5 L-252,75.5 Q-252,68 -245.29,64.65 Z\" fill=\"none\" stroke=\"#3b3631\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/>\n        <path d=\"M-232.63,69.28 Q-238,66.6 -232.63,63.92 L-176.17,35.68 Q-170.8,33 -165.43,35.68 L-125.07,55.87 Q-119.7,58.55 -125.07,61.23 L-181.53,89.47 Q-186.9,92.15 -192.27,89.47 Z\" fill=\"#6b5236\" opacity=\".14\" filter=\"url(#blur-sm)\"/>\n        \n    <path d=\"M-224.7,67.55 Q-224.7,66.05 -222.46,67.17 L-189.14,83.83 Q-186.9,84.95 -186.9,86.45 L-186.9,86.45 Q-186.9,87.95 -189.14,86.83 L-222.46,70.17 Q-224.7,69.05 -224.7,67.55 Z\" fill=\"#ddd6ce\"/>\n    <path d=\"M-186.9,86.45 Q-186.9,84.95 -184.66,83.83 L-130.34,56.67 Q-128.1,55.55 -128.1,57.05 L-128.1,57.05 Q-128.1,58.55 -130.34,59.67 L-184.66,86.83 Q-186.9,87.95 -186.9,86.45 Z\" fill=\"#cfc8c0\"/>\n    <path d=\"M-222.46,67.17 Q-224.7,66.05 -222.46,64.93 L-168.14,37.77 Q-165.9,36.65 -163.66,37.77 L-130.34,54.43 Q-128.1,55.55 -130.34,56.67 L-184.66,83.83 Q-186.9,84.95 -189.14,83.83 Z\" fill=\"#efeae4\"/>\n    <path d=\"M-224.7,67.55 Q-224.7,66.05 -222.46,64.93 L-168.14,37.77 Q-165.9,36.65 -163.66,37.77 L-130.34,54.43 Q-128.1,55.55 -128.1,57.05 L-128.1,57.05 Q-128.1,58.55 -130.34,59.67 L-184.66,86.83 Q-186.9,87.95 -189.14,86.83 L-222.46,70.17 Q-224.7,69.05 -224.7,67.55 Z\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.4\" stroke-linejoin=\"round\"/>\n        <g transform=\"matrix(1 -0.5 1 0.5 -222.6 67.1)\" fill=\"#fbf8f4\" stroke=\"#b9b1a7\" stroke-width=\".55\">\n          <rect x=\"3\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"7.7\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"12.4\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"17.1\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"21.8\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"26.5\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"31.2\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"35.9\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"40.6\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"45.3\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"50\" y=\"2.5\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"3\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"7.7\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"12.4\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"17.1\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"21.8\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"26.5\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"31.2\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"35.9\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"40.6\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"45.3\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"50\" y=\"6.8\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"3\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"7.7\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"12.4\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"17.1\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"21.8\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"26.5\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"31.2\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"35.9\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"40.6\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"45.3\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"50\" y=\"11.1\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"3\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"7.7\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"12.4\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"17.1\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"21.8\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"26.5\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"31.2\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"35.9\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"40.6\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"45.3\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/><rect x=\"50\" y=\"15.4\" width=\"3.8\" height=\"3.3\" rx=\".7\"/>\n          <rect x=\"19.4\" y=\"21.5\" width=\"20\" height=\"9\" rx=\"1.6\"/>\n        </g>\n        \n    <path d=\"M-229.6,19.6 Q-229.6,16.6 -227.15,17.83 L-227.15,17.83 Q-224.7,19.05 -224.7,22.05 L-224.7,63.05 Q-224.7,66.05 -227.15,64.83 L-227.15,64.83 Q-229.6,63.6 -229.6,60.6 Z\" fill=\"#6E6862\"/>\n    <path d=\"M-224.7,22.05 Q-224.7,19.05 -222.02,17.71 L-168.58,-9.01 Q-165.9,-10.35 -165.9,-7.35 L-165.9,33.65 Q-165.9,36.65 -168.58,37.99 L-222.02,64.71 Q-224.7,66.05 -224.7,63.05 Z\" fill=\"#3D3935\"/>\n    <path d=\"M-227.15,17.83 Q-229.6,16.6 -226.92,15.26 L-173.48,-11.46 Q-170.8,-12.8 -168.35,-11.57 L-168.35,-11.57 Q-165.9,-10.35 -168.58,-9.01 L-222.02,17.71 Q-224.7,19.05 -227.15,17.83 Z\" fill=\"#8B8580\"/>\n    <path d=\"M-229.6,19.6 Q-229.6,16.6 -226.92,15.26 L-173.48,-11.46 Q-170.8,-12.8 -168.35,-11.57 L-168.35,-11.57 Q-165.9,-10.35 -165.9,-7.35 L-165.9,33.65 Q-165.9,36.65 -168.58,37.99 L-222.02,64.71 Q-224.7,66.05 -227.15,64.83 L-227.15,64.83 Q-229.6,63.6 -229.6,60.6 Z\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/>\n        <g transform=\"matrix(1 -0.5 0 1 -224.7 19.05)\">\n    <rect x=\"3.4\" y=\"3.4\" width=\"52\" height=\"39\" rx=\"1.5\" fill=\"#FBF8F4\"/>\n    <rect x=\"3.4\" y=\"3.4\" width=\"52\" height=\"7\" rx=\"1.5\" fill=\"#E4D9CB\"/>\n    <circle cx=\"6.6\" cy=\"6.9\" r=\"1\" fill=\"#E5534B\"/><circle cx=\"9.6\" cy=\"6.9\" r=\"1\" fill=\"#EFB041\"/><circle cx=\"12.6\" cy=\"6.9\" r=\"1\" fill=\"#7FC278\"/>\n    <rect x=\"16\" y=\"5\" width=\"36\" height=\"3.8\" rx=\"1.9\" fill=\"#FBF8F4\"/>\n    <rect x=\"7\" y=\"14.5\" width=\"44.8\" height=\"12\" rx=\"1.5\" fill=\"url(#screen)\"/>\n    <rect x=\"7\" y=\"29.5\" width=\"27.78\" height=\"2.6\" rx=\"1.3\" fill=\"#D6CCBF\"/>\n    <rect x=\"7\" y=\"34\" width=\"35.84\" height=\"2.6\" rx=\"1.3\" fill=\"#D6CCBF\"/>\n    <rect x=\"3.4\" y=\"3.4\" width=\"52\" height=\"39\" rx=\"1.5\" fill=\"url(#screen-glare)\"/></g>\n      </g>\n    </g>",
+    "over": "<g opacity=\"1\" transform=\"translate(0 0)\"><g opacity=\"1\">\n    <g class=\"pill\">\n      <rect x=\"-193.95\" y=\"139.5\" width=\"51.9\" height=\"21\" rx=\"10.5\" fill=\"#1c1a17\"/>\n      <rect x=\"-193.95\" y=\"137.5\" width=\"51.9\" height=\"21\" rx=\"10.5\" fill=\"#fbf6ef\" stroke=\"#211e1b\" stroke-width=\"1.3\"/>\n      <g transform=\"translate(-184.95 142) scale(0.5)\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"4.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></g>\n      <text x=\"-160.5\" y=\"151.78\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"700\" fill=\"#211e1b\">you</text>\n    </g></g><g transform=\"translate(0 -20.1)\" opacity=\"1\">\n    <g class=\"pill\">\n      <rect x=\"-276.55\" y=\"-8.5\" width=\"152.7\" height=\"21\" rx=\"10.5\" fill=\"#1c1a17\"/>\n      <rect x=\"-276.55\" y=\"-10.5\" width=\"152.7\" height=\"21\" rx=\"10.5\" fill=\"#dcefd2\" stroke=\"#211e1b\" stroke-width=\"1.3\"/>\n      <g transform=\"translate(-267.54999999999995 -6) scale(0.5)\" fill=\"none\" stroke=\"#24521c\" stroke-width=\"4.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></g>\n      <text x=\"-192.7\" y=\"3.78\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"700\" fill=\"#24521c\">page ready · 155 ms</text>\n    </g></g></g>",
+    "poly": [
+      [
+        -168,
+        26
+      ],
+      [
+        -84,
+        68
+      ],
+      [
+        -84,
+        84
+      ],
+      [
+        -168,
+        126
+      ],
+      [
+        -252,
+        84
+      ],
+      [
+        -252,
+        68
+      ]
+    ],
+    "bounds": [
+      -284.54999999999995,
+      -42.1,
+      -76,
+      166
+    ]
+  },
+  "dns": {
+    "body": "\n    <g opacity=\"1\">\n      <path d=\"M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z\" transform=\"translate(0 9)\" fill=\"#6b5236\" opacity=\"0.26\" filter=\"url(#blur-lg)\"/>\n      <g transform=\"translate(0 0)\">\n        \n        \n    <path d=\"M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z\" fill=\"url(#g-yellow-side)\"/>\n    <path d=\"M14,-19 Q14,-25 19.37,-27.68 L61.95,-48.98 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 14,9 Z\" fill=\"#3a2a14\" opacity=\".05\"/>\n    <path d=\"M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 61.95,-48.98 L19.37,-27.68 Q14,-25 8.63,-27.68 L-33.95,-48.98 Q-42,-53 -33.95,-57.02 Z\" fill=\"url(#g-yellow-top)\"/>\n    <path d=\"M4.64,-73.49 Q14,-77 23.36,-73.49 L61.57,-59.16 Q70,-56 61.57,-52.84 L19.62,-37.11 Q14,-35 8.38,-37.11 L-33.57,-52.84 Q-42,-56 -33.57,-59.16 Z\" fill=\"#fff\" opacity=\".22\" filter=\"url(#blur-sm)\"/>\n    <path d=\"M-42,-53 L6.84,-28.58 Q14,-25 21.16,-28.58 L70,-53\" transform=\"translate(0 1.4)\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".75\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>\n    <path d=\"M-42,-53 L6.84,-28.58 Q14,-25 21.16,-28.58 L70,-53\" transform=\"translate(0 3.4)\" fill=\"none\" stroke=\"#5a4123\" stroke-opacity=\".07\" stroke-width=\"2.4\" stroke-linecap=\"round\"/>\n    <path d=\"M5.06,-76.53 Q14,-81 22.94,-76.53 L61.95,-57.02 Q70,-53 70,-44 L70,-16 Q70,-7 61.95,-2.98 L24.73,15.63 Q14,21 3.27,15.63 L-33.95,-2.98 Q-42,-7 -42,-16 L-42,-44 Q-42,-53 -33.95,-57.02 Z\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.9\" stroke-linejoin=\"round\"/>\n        \n        \n        \n        <g opacity=\"1\"><g transform=\"translate(2 -66) scale(1)\" fill=\"none\" stroke=\"#1d1b19\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\"/><path d=\"M2 12h20\"/></g><g opacity=\"1\"><text x=\"14\" y=\"-23.4\" text-anchor=\"middle\" font-size=\"13.5\" font-weight=\"800\" fill=\"#211e1b\" >DNS</text><text x=\"14\" y=\"-9.4\" text-anchor=\"middle\" font-size=\"10\" font-weight=\"600\" fill=\"#211e1b\" >resolver</text></g></g>\n        \n      </g>\n    </g>",
+    "over": "",
+    "poly": [
+      [
+        14,
+        -81
+      ],
+      [
+        70,
+        -53
+      ],
+      [
+        70,
+        -7
+      ],
+      [
+        14,
+        21
+      ],
+      [
+        -42,
+        -7
+      ],
+      [
+        -42,
+        -53
+      ]
+    ],
+    "bounds": [
+      -50,
+      -115,
+      78,
+      35
+    ]
+  },
+  "web": {
+    "body": "\n    <g opacity=\"1\">\n      <path d=\"M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z\" transform=\"translate(0 9)\" fill=\"#6b5236\" opacity=\"0.26\" filter=\"url(#blur-lg)\"/>\n      <g transform=\"translate(0 0)\">\n        \n        \n    <path d=\"M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z\" fill=\"url(#g-blue-side)\"/>\n    <path d=\"M126,65 Q126,59 131.37,56.32 L173.95,35.02 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 126,93 Z\" fill=\"#3a2a14\" opacity=\".05\"/>\n    <path d=\"M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 173.95,35.02 L131.37,56.32 Q126,59 120.63,56.32 L78.05,35.02 Q70,31 78.05,26.98 Z\" fill=\"url(#g-blue-top)\"/>\n    <path d=\"M116.64,10.51 Q126,7 135.36,10.51 L173.57,24.84 Q182,28 173.57,31.16 L131.62,46.89 Q126,49 120.38,46.89 L78.43,31.16 Q70,28 78.43,24.84 Z\" fill=\"#fff\" opacity=\".22\" filter=\"url(#blur-sm)\"/>\n    <path d=\"M70,31 L118.84,55.42 Q126,59 133.16,55.42 L182,31\" transform=\"translate(0 1.4)\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".75\" stroke-width=\"1.6\" stroke-linecap=\"round\"/>\n    <path d=\"M70,31 L118.84,55.42 Q126,59 133.16,55.42 L182,31\" transform=\"translate(0 3.4)\" fill=\"none\" stroke=\"#5a4123\" stroke-opacity=\".07\" stroke-width=\"2.4\" stroke-linecap=\"round\"/>\n    <path d=\"M117.06,7.47 Q126,3 134.94,7.47 L173.95,26.98 Q182,31 182,40 L182,68 Q182,77 173.95,81.02 L136.73,99.63 Q126,105 115.27,99.63 L78.05,81.02 Q70,77 70,68 L70,40 Q70,31 78.05,26.98 Z\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.9\" stroke-linejoin=\"round\"/>\n        \n        \n        \n        <g opacity=\"1\">\n    <g transform=\"translate(126 30) scale(1)\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.9\" stroke-linecap=\"round\">\n      <rect x=\"-11\" y=\"-10\" width=\"22\" height=\"8.5\" rx=\"2.2\"/>\n      <rect x=\"-11\" y=\"1.5\" width=\"22\" height=\"8.5\" rx=\"2.2\"/>\n      <path d=\"M-6.5 -5.75h.01M-6.5 5.75h.01\" stroke-width=\"2.6\"/>\n      <path d=\"M1 -5.75h5.5M1 5.75h5.5\"/>\n    </g><g opacity=\"1\"><text x=\"126\" y=\"57.1\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"800\" fill=\"#211e1b\" >Web</text><text x=\"126\" y=\"72.6\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"800\" fill=\"#211e1b\" >Server</text></g></g>\n        \n      </g>\n    </g>",
+    "over": "",
+    "poly": [
+      [
+        126,
+        3
+      ],
+      [
+        182,
+        31
+      ],
+      [
+        182,
+        77
+      ],
+      [
+        126,
+        105
+      ],
+      [
+        70,
+        77
+      ],
+      [
+        70,
+        31
+      ]
+    ],
+    "bounds": [
+      62,
+      -31,
+      190,
+      119
+    ]
+  },
+  "db": {
+    "body": "\n    <g opacity=\"1\">\n      <ellipse cx=\"308\" cy=\"-9\" rx=\"36.66\" ry=\"17.83\" fill=\"#6b5236\" opacity=\"0.22\" filter=\"url(#blur-md)\"/>\n      \n      <path d=\"M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52 Z\" fill=\"url(#g-purple-side)\"/>\n      \n      <path d=\"M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52 Z\" fill=\"url(#cyl-sheen)\"/>\n      <ellipse cx=\"308\" cy=\"-52\" rx=\"33.66\" ry=\"16.83\" fill=\"url(#g-purple-top)\"/>\n      <path d=\"M277.34,-49.5 A30.66,14.83 0 0 0 338.66,-49.5\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".7\" stroke-width=\"1.4\"/>\n      <path d=\"M274.34,-52 V-14 A33.66,16.83 0 0 0 341.66,-14 V-52\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.9\" stroke-linejoin=\"round\"/>\n      <ellipse cx=\"308\" cy=\"-52\" rx=\"33.66\" ry=\"16.83\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"1.9\"/>\n      <g transform=\"translate(298.5 -25.670858607760167) scale(0.7916666666666666)\" fill=\"none\" stroke=\"#1d1b19\" stroke-width=\"2.2736842105263158\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M3 5V19A9 3 0 0 0 21 19V5\"/><path d=\"M3 12A9 3 0 0 0 21 12\"/></g>\n    </g>",
+    "over": "<g opacity=\"1\"><g opacity=\"1\">\n    <g class=\"pill\">\n      <rect x=\"351.66\" y=\"-35.8\" width=\"83.4\" height=\"21\" rx=\"10.5\" fill=\"#1c1a17\"/>\n      <rect x=\"351.66\" y=\"-37.8\" width=\"83.4\" height=\"21\" rx=\"10.5\" fill=\"#fbf6ef\" stroke=\"#211e1b\" stroke-width=\"1.3\"/>\n      <g transform=\"translate(360.65828278447964 -33.3) scale(0.5)\" fill=\"none\" stroke=\"#211e1b\" stroke-width=\"4.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M3 5V19A9 3 0 0 0 21 19V5\"/><path d=\"M3 12A9 3 0 0 0 21 12\"/></g>\n      <text x=\"400.86\" y=\"-23.52\" text-anchor=\"middle\" font-size=\"10.5\" font-weight=\"700\" fill=\"#211e1b\">database</text>\n    </g></g></g>",
+    "poly": [
+      [
+        274.34171721552036,
+        -52
+      ],
+      [
+        276.9038014359422,
+        -58.44023359173974
+      ],
+      [
+        284.2,
+        -63.9
+      ],
+      [
+        295.1195328165205,
+        -67.54809928202889
+      ],
+      [
+        308,
+        -68.82914139223983
+      ],
+      [
+        320.8804671834795,
+        -67.54809928202889
+      ],
+      [
+        331.8,
+        -63.9
+      ],
+      [
+        339.0961985640578,
+        -58.44023359173975
+      ],
+      [
+        341.65828278447964,
+        -52
+      ],
+      [
+        341.65828278447964,
+        -14
+      ],
+      [
+        339.0961985640578,
+        -7.5597664082602565
+      ],
+      [
+        331.8,
+        -2.1000000000000014
+      ],
+      [
+        320.8804671834795,
+        1.548099282028879
+      ],
+      [
+        308,
+        2.82914139223983
+      ],
+      [
+        295.1195328165205,
+        1.548099282028879
+      ],
+      [
+        284.2,
+        -2.0999999999999996
+      ],
+      [
+        276.9038014359422,
+        -7.559766408260255
+      ],
+      [
+        274.34171721552036,
+        -13.999999999999998
+      ]
+    ],
+    "bounds": [
+      266.34171721552036,
+      -80.82914139223983,
+      443.0582827844796,
+      12.82914139223983
+    ]
+  }
+}
